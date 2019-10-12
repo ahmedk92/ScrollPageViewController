@@ -24,11 +24,15 @@ open class ScrollPageViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    open var index: Int {
+        return Int(scrollView.contentOffset.x / scrollView.bounds.width)
+    }
+    
     // MARK: Internals
     private var count: Int {
         return dataSource?.numberOfViewControllers(in: self) ?? 0
     }
-    private lazy var scrollView: UIScrollView = {
+    private lazy var scrollView: ScrollView = {
         let sv = ScrollView(frame: .zero)
         sv.isPagingEnabled = true
         return sv
@@ -63,9 +67,27 @@ open class ScrollPageViewController: UIViewController {
         super.viewDidLayoutSubviews()
         scrollView.contentSize = CGSize(width: CGFloat(count) * scrollView.bounds.width, height: scrollView.bounds.height)
     }
+    
+    open override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        let index = self.index
+        coordinator.animate(alongsideTransition: { (_) in
+            self.scrollView.adjustContentSize(forCount: self.count)
+            self.scrollView.adjustContentOffset(forIndex: index)
+        })
+        super.viewWillTransition(to: size, with: coordinator)
+    }
 }
 
 class ScrollView: UIScrollView {
+    
+    func adjustContentSize(forCount count: Int) {
+        contentSize = CGSize(width: CGFloat(count) * bounds.width, height: bounds.height)
+    }
+    
+    func adjustContentOffset(forIndex index: Int) {
+        contentOffset = CGPoint(x: CGFloat(index) * bounds.width, y: 0)
+    }
+    
     override func layoutSubviews() {
         super.layoutSubviews()
         
