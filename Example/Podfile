@@ -1,0 +1,11 @@
+use_frameworks!
+
+target 'ScrollPageViewController_Example' do
+  pod 'ScrollPageViewController', :path => '../'
+
+  target 'ScrollPageViewController_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end
