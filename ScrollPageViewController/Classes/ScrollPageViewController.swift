@@ -29,7 +29,7 @@ open class ScrollPageViewController: UIViewController {
         return dataSource?.numberOfViewControllers(in: self) ?? 0
     }
     private lazy var scrollView: UIScrollView = {
-        let sv = UIScrollView(frame: .zero)
+        let sv = ScrollView(frame: .zero)
         sv.isPagingEnabled = true
         return sv
     }()
@@ -44,14 +44,54 @@ open class ScrollPageViewController: UIViewController {
         ])
     }
     
+    private func loadViewControllers() {
+        (0..<count).compactMap { dataSource?.scrollPageViewController(self, viewControllerAt: $0) }.enumerated().forEach { (index, viewController) in
+            addChild(viewController)
+            scrollView.addSubview(ScrollViewCell(index: index, contentView: viewController.view))
+            viewController.didMove(toParent: self)
+        }
+    }
+    
     // MARK: Overrides
     open override func viewDidLoad() {
         super.viewDidLoad()
         addScrollView()
+        loadViewControllers()
     }
     
     open override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         scrollView.contentSize = CGSize(width: CGFloat(count) * scrollView.bounds.width, height: scrollView.bounds.height)
+    }
+}
+
+class ScrollView: UIScrollView {
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        for cell in subviews.compactMap({ $0 as? ScrollViewCell }) {
+            cell.frame = CGRect(x: CGFloat(cell.index) * bounds.width, y: 0, width: bounds.width, height: bounds.height)
+        }
+    }
+}
+
+class ScrollViewCell: UIView {
+    var index: Int
+    weak var contentView: UIView?
+    
+    init(index: Int, contentView: UIView) {
+        self.index = index
+        super.init(frame: .zero)
+        self.contentView = contentView
+        addSubview(contentView)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        contentView?.frame = bounds
     }
 }

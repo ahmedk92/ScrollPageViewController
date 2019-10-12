@@ -53,7 +53,9 @@ class ViewController: UIViewController, ScrollPageViewControllerDataSource {
     }
     
     func scrollPageViewController(_ scrollPageViewController: ScrollPageViewController, viewControllerAt index: Int) -> UIViewController {
-        return storyboard!.instantiateViewController(withIdentifier: "ContentViewController")
+        let viewController = storyboard!.instantiateViewController(withIdentifier: "ContentViewController") as! ContentViewController
+        viewController.index = index
+        return viewController
     }
 
 }
